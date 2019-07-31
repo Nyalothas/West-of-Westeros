@@ -6,6 +6,10 @@ var WestOfWesteros = {
 
 			dotSize = 2
 
+			, minVal = 0
+
+			, maxVal = 500
+
 			, dotColor = 'white'
 
 			, canvas
@@ -66,16 +70,35 @@ var WestOfWesteros = {
 			}
 
 			, drawPath = function (coordinatesArray) {
-				let destinations = coordinatesArray.length;
+				let destinations = coordinatesArray.length - 1;
 
-				for (let i = 0, j = 1; i < destinations; i++ , j++) {
+				for (let i = 0; i < destinations; i++) {
 					let start = coordinatesArray[i];
-					let end = coordinatesArray[j];
-					if (!end) {
-						end = start;
-					}
+					let end = coordinatesArray[i + 1];
 					drawLine(ctx, start, end);
 				}
+			}
+
+			, computeDistanceBetweenPoints = function (x1, y1, x2, y2) {
+				return Math.sqrt((Math.pow(x2 - x1, 2)) + (Math.pow(y2 - y1, 2)))
+			}
+
+			, generateRandomNumber = function (min = minVal, max = maxVal) {
+				return Math.floor(Math.random() * (max - min + 1)) + min;
+			}
+
+			, generateRandomBiArray = function () {
+				let generatedArray = [];
+
+				let arraySize = generateRandomNumber(1, 100);
+
+				for (let i = 0; i < arraySize; i++) {
+					let x = generateRandomNumber();
+					let y = generateRandomNumber();
+					generatedArray.push([x, y]);
+				}
+
+				return generatedArray;
 			}
 
 			, drawCoordinates = function (coordinatesArray) {
@@ -88,14 +111,65 @@ var WestOfWesteros = {
 				}
 			}
 
+			, swapArrayElements = function (arr, indexA, indexB) {
+				let temp = arr[indexA];
+				arr[indexA] = arr[indexB];
+				arr[indexB] = temp;
+			}
+
 			, compute = function () {
 				let pathArray = tryParseJSON(textarea.value);
 
 				if (!pathArray) {
 					return;
 				}
+				ini = performance.now();
 
 				ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+				let pathArrayLen = pathArray.length;
+				/* 				let distances = [];
+								for (let i = 0; i < pathArrayLen; i++) {
+									let x1 = pathArray[i][0];
+									let x2 = pathArray[i + 1][0];
+									let y1 = pathArray[i][1];
+									let y2 = pathArray[i + 1][1];
+									distances.push({
+										distance: computeDistanceBetweenPoints(x1, y1, x2, y2),
+										c1: pathArray[i],
+										c2: pathArray[i + 1]
+									});
+								} */
+
+				let smallestDistance = 9999;
+				for (let i = 0; i < pathArrayLen; i++) {
+					let x1 = pathArray[i][0];
+					let y1 = pathArray[i][1];
+
+					let coord = i;
+
+					for (let j = i + 1; j < pathArrayLen; j++) {
+						let x2 = pathArray[j][0];
+						let y2 = pathArray[j][1];
+
+						let d = computeDistanceBetweenPoints(x1, y1, x2, y2);
+						if (d < smallestDistance) {
+							coord = j;
+							smallestDistance = d;
+						}
+					}
+
+					// switch places in pathArray second place with coord
+					if (i !== coord - 1) {
+						swapArrayElements(pathArray, coord, i);
+						console.log(`${coord} , ${i} : ${smallestDistance}`);
+					}
+
+				}
+
+				//d2.sort((d1, d2) => d1.distance - d2.distance);
+
+				//console.log(d2);
 
 				console.log(pathArray);
 
@@ -103,6 +177,10 @@ var WestOfWesteros = {
 
 				// final step
 				drawPath(pathArray);
+
+				end = performance.now();
+
+				console.log((end - ini) + " ms");
 			}
 
 			, registerComputeEvent = function () {
@@ -110,14 +188,39 @@ var WestOfWesteros = {
 				btnCompute.addEventListener('click', compute);
 			}
 
+			/**
+			 * Gets the canvas DOM reference and sets it's size
+			 * @param {string} name the id of the canvas
+			 */
+			, getAndInitializeCanvas = function (name) {
+				let canvas = getElementById(name);
+
+				canvas.width = 500;
+				canvas.height = 500;
+
+				return canvas;
+			}
+
+			/**
+			* Returns the 2d context of a canvas
+			* @param { object } canvas
+			*/
+			, getCanvas2DContext = function (canvas) {
+				return canvas.getContext('2d');
+			}
+
 			, initialize = function () {
 
-				canvas = getElementById('foreground');
-				ctx = canvas.getContext('2d');
-			
+				canvas = getAndInitializeCanvas('foreground');
+				ctx = getCanvas2DContext(canvas);
+
 				createGradient();
 
 				registerComputeEvent();
+
+				getElementById('btnGenerate').addEventListener('click', () => {
+					textarea.value = JSON.stringify(generateRandomBiArray());
+				});
 			}
 
 		return {
