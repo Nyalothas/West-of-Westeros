@@ -6,29 +6,36 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
 	<title>West of Westeros</title>
-	<link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro&display=swap" rel="stylesheet">
 	<link type="text/css" rel="stylesheet" href="./style.css">
 </head>
 
 <body>
 
 	<main class="column">
-		<div class="row card">
+		<div class="row card mb-1">
 			<textarea id="coordinates" name="coordinates" rows="5" placeholder="[[23, 141], [428, 3]]"></textarea>
 		</div>
 
-		<div class="row-compute">
+		<div class="row-compute mb-1">
 			<button id="btnCompute" type="button">Compute</button>
 			<button id="btnGenerate" type="button">Generate</button>
 		</div>
-		
-		<div>
-			<canvas id="background" style="z-index: 0"></canvas>
-			<canvas id="foreground" tabindex="0" style="z-index: 1"></canvas>
+
+		<div class="row">
+			<div class="column">
+				<canvas id="background" style="z-index: 0"></canvas>
+				<canvas id="foreground" tabindex="0" style="z-index: 1"></canvas>
+			</div>
+
+			<div class="column">
+				<div>
+					Hello!
+				</div>
+			</div>
 		</div>
 	</main>
 
-	<script src="./wow.js"></script>
+	<script src="./scripts/wow.js"></script>
 </body>
 
 </html>

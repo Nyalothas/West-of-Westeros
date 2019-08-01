@@ -1,8 +1,10 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto+Condensed&display=swap');
 body {
     margin: 0;
     background-color: #151920;
-    font-family: Source Sans Pro, Segoe UI, sans-serif
-   /* #232c3b*/
+    font-family: 'Roboto Condensed', sans-serif;
+    color: #7612A4;
+    /* #232c3b*/
 }
 
 main {
@@ -77,9 +79,10 @@ button {
     border-radius: 4px;
     padding: 0.2rem 0.8rem;
     transition: all 0.3s ease 0s;
+    font-family: inherit;
 }
 
 button:hover {
     background-color: rgb(0, 149, 255);
-	border-color: rgb(0, 149, 255);
+    border-color: rgb(0, 149, 255);
 }

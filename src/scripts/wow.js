@@ -87,6 +87,18 @@ var WestOfWesteros = {
 			}
 
 			/**
+			 * Draws a circle on the canvas
+			 * @param { object } ctx canvas 2D context
+			 * @param { number } x x coordinate
+			 * @param { number } y y coordinate
+			 */
+			, drawCircle = function (ctx, x, y) {
+				ctx.beginPath();
+				ctx.arc(x, y, 2, 0, 2 * Math.PI);
+				ctx.stroke();
+			}
+
+			/**
 			 * Draws a path between an array of points
 			 * @param { object } ctx canvas 2D context
 			 * @param { Array } pointsArray 1D numeric array
@@ -102,13 +114,13 @@ var WestOfWesteros = {
 			}
 
 			/**
- * Draws points on a canvas
- * @param { object } ctx canvas 2D context
- * @param { Array } arr 1D numeric array
- */
+			* Draws points on a canvas
+			* @param { object } ctx canvas 2D context
+			* @param { Array } arr 1D numeric array
+			*/
 			, drawCoordinates = function (ctx, arr) {
 				let destinations = arr.length;
-
+				ctx.fillStyle = dotColor;
 				for (let i = 0; i < destinations; i++) {
 					let x = arr[i][0];
 					let y = arr[i][1];
@@ -188,12 +200,17 @@ var WestOfWesteros = {
 
 			/**
 			 * Compute most optimized path?🤔
-			 * No - this will generate a path, but it won't be the most optimized one
+			 * Aparrently this is called a greedy algorithm😲
+			 * And it also has a name - 'Nearest Neighbour'🤯
+			 * We created an algorithm that exists - I see this as an absolute win
+			 * No - this will generate a path, but it won't be the most optimized one(or maybe...we get lucky)
 			 * @param { Array } pathArray 2D numeric array
+			 * @returns { number } optimized distance
 			 */
-			, computeOptimizedPath = function (pathArray, optimizedDistance) {
+			, computeOptimizedPath = function (pathArray) {
 				let pathArrayLen = pathArray.length;
-				let totalDistance = 0;
+				let optimizedDistance = 0;
+
 				for (let i = 0; i < pathArrayLen; i++) {
 					let smallestDistance = 9007199254740991;
 					let x1 = pathArray[i][0];
@@ -210,7 +227,7 @@ var WestOfWesteros = {
 						if (distance < smallestDistance) {
 							pointIndex = j;
 							smallestDistance = distance;
-							totalDistance = +distance;
+							optimizedDistance = +distance;
 						}
 					}
 
@@ -220,7 +237,7 @@ var WestOfWesteros = {
 					}
 				}
 
-				optimizedDistance[0] = totalDistance;
+				return optimizedDistance;
 			}
 
 			/**
@@ -268,15 +285,14 @@ var WestOfWesteros = {
 
 				clearCanvas(ctx, mapSize, mapSize);
 
-				let optimizedDistance = [];
-				computeOptimizedPath(pathArray, optimizedDistance);
+				let optimizedDistance = computeOptimizedPath(pathArray);
 
 				drawCoordinates(ctx, pathArray);
 				drawPath(ctx, pathArray);
 
 				end = performance.now();
 
-				console.log('optimizedDistance', optimizedDistance[0]);
+				console.log('optimizedDistance', optimizedDistance);
 				console.log('finalPath', pathArray);
 				console.log((end - ini) + ' ms');
 			}
@@ -315,3 +331,7 @@ var WestOfWesteros = {
 }
 
 WestOfWesteros.init();
+
+// TD: Display stuff on second column
+// foreground canvas dispaly stuff
+// try another algorithm for computation
