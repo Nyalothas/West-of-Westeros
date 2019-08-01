@@ -4,20 +4,35 @@ var WestOfWesteros = {
 
 		var
 
-			dotSize = 2
+			/**
+			 * Location size displayed on canvas
+			 */
+			dotSize
 
-			, minVal = 0
+			/**
+			 * Color of the location displayed on canvas
+			 */
+			, dotColor
 
-			, maxVal = 500
+			/**
+			 * Minimum interval value
+			 */
+			, minVal
 
-			, dotColor = 'white'
+			/**
+			 * Maximum interval value
+			 */
+			, maxVal
 
 			, canvas
 
 			, ctx
 
-			, gradient
+			, textarea
 
+			/**
+			 * Returns the matching element by id
+			 */
 			, getElementById = function (id) {
 				return document.getElementById(id);
 			}
@@ -35,26 +50,77 @@ var WestOfWesteros = {
 				ctx.fillRect(x, y, size, size);
 			}
 
-			, createGradient = function () {
-				gradient = ctx.createLinearGradient(0, 0, 500, 500);
-				gradient.addColorStop("0", "magenta");
-				gradient.addColorStop("0.5", "cyan");
-				gradient.addColorStop("1.0", "red");
+			/**
+			 * Clears the canvas
+			 * @param { object } ctx canvas 2d context
+			 * @param { number } width width of the canvas
+			 * @param { number } height height of the canvas
+			 */
+			, clearCanvas = function (ctx, width, height) {
+				ctx.clearRect(0, 0, width, height);
+			}
+
+			/**
+			 * Creates a gradient of a specific size and assigns it to the canvas context
+			 * @param { object } ctx canvas 2d context
+			 * @param { number } size width and height of the gradient
+			 */
+			, createGradient = function (ctx, size) {
+				let gradient = ctx.createLinearGradient(0, 0, size, size);
+				gradient.addColorStop('0', 'magenta');
+				gradient.addColorStop('0.5', 'cyan');
+				gradient.addColorStop('1.0', 'red');
+				ctx.strokeStyle = gradient;
 			}
 
 			/**
 			 * Draws a line between two sets of coordinates
+			 * @param { object } ctx canvas 2D context
+			 * @param { array } start 1D numeric array
+			 * @param { array } end 1D numeric array
 			 */
 			, drawLine = function (ctx, start, end) {
-				ctx.strokeStyle = gradient;
 				ctx.beginPath();
 				ctx.moveTo(start[0], start[1]);
 				ctx.lineTo(end[0], end[1]);
 				ctx.stroke();
 			}
 
-			, textarea = getElementById('coordinates')
+			/**
+			 * Draws a path between an array of points
+			 * @param { object } ctx canvas 2D context
+			 * @param { Array } pointsArray 1D numeric array
+			 */
+			, drawPath = function (ctx, pointsArray) {
+				let destinations = pointsArray.length - 1;
 
+				for (let i = 0; i < destinations; i++) {
+					let start = pointsArray[i];
+					let end = pointsArray[i + 1];
+					drawLine(ctx, start, end);
+				}
+			}
+
+			/**
+ * Draws points on a canvas
+ * @param { object } ctx canvas 2D context
+ * @param { Array } arr 1D numeric array
+ */
+			, drawCoordinates = function (ctx, arr) {
+				let destinations = arr.length;
+
+				for (let i = 0; i < destinations; i++) {
+					let x = arr[i][0];
+					let y = arr[i][1];
+					createRectangle(ctx, x, y);
+				}
+			}
+
+			/**
+			 * Tries to parse a string
+			 * @param { string } jsonString string to parse
+			 * @returns { object | boolean } returns the parsed object or false if it fails
+			 */
 			, tryParseJSON = function (jsonString) {
 				try {
 					let o = JSON.parse(jsonString);
@@ -69,25 +135,32 @@ var WestOfWesteros = {
 				return false;
 			}
 
-			, drawPath = function (coordinatesArray) {
-				let destinations = coordinatesArray.length - 1;
-
-				for (let i = 0; i < destinations; i++) {
-					let start = coordinatesArray[i];
-					let end = coordinatesArray[i + 1];
-					drawLine(ctx, start, end);
-				}
-			}
-
+			/**
+			 * Calculates the distance between two sets of points
+			 * @param { number } x1 x coordinate of the first point
+			 * @param { number } y1 y coordinate of the first point
+			 * @param { number } x2 x coordinate of the second point
+			 * @param { number } y2 y coordinate of the second point
+			 */
 			, computeDistanceBetweenPoints = function (x1, y1, x2, y2) {
 				return Math.sqrt((Math.pow(x2 - x1, 2)) + (Math.pow(y2 - y1, 2)))
 			}
 
+			/**
+			 * Returns a random generated number
+			 * @param { number } min minimum value
+			 * @param { number } max maximum value
+			 * @returns { number } generated number
+			 */
 			, generateRandomNumber = function (min = minVal, max = maxVal) {
 				return Math.floor(Math.random() * (max - min + 1)) + min;
 			}
 
-			, generateRandomBiArray = function () {
+			/**
+			 * Returns a random 2D array of maximum 100 elements
+			 * @returns { array } generated array
+			 */
+			, generateRandom2DArray = function () {
 				let generatedArray = [];
 
 				let arraySize = generateRandomNumber(1, 100);
@@ -101,102 +174,77 @@ var WestOfWesteros = {
 				return generatedArray;
 			}
 
-			, drawCoordinates = function (coordinatesArray) {
-				let destinations = coordinatesArray.length;
-
-				for (let i = 0; i < destinations; i++) {
-					let x = coordinatesArray[i][0];
-					let y = coordinatesArray[i][1];
-					createRectangle(ctx, x, y);
-				}
-			}
-
+			/**
+			 * Swaps two elements in an array
+			 * @param { Array } arr 1D numeric array
+			 * @param { number } indexA 1D numeric array
+			 * @param { number } indexB 1D numeric array
+			 */
 			, swapArrayElements = function (arr, indexA, indexB) {
 				let temp = arr[indexA];
 				arr[indexA] = arr[indexB];
 				arr[indexB] = temp;
 			}
 
-			, compute = function () {
-				let pathArray = tryParseJSON(textarea.value);
-
-				if (!pathArray) {
-					return;
-				}
-				ini = performance.now();
-
-				ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+			/**
+			 * Compute most optimized path?🤔
+			 * No - this will generate a path, but it won't be the most optimized one
+			 * @param { Array } pathArray 2D numeric array
+			 */
+			, computeOptimizedPath = function (pathArray, optimizedDistance) {
 				let pathArrayLen = pathArray.length;
-				/* 				let distances = [];
-								for (let i = 0; i < pathArrayLen; i++) {
-									let x1 = pathArray[i][0];
-									let x2 = pathArray[i + 1][0];
-									let y1 = pathArray[i][1];
-									let y2 = pathArray[i + 1][1];
-									distances.push({
-										distance: computeDistanceBetweenPoints(x1, y1, x2, y2),
-										c1: pathArray[i],
-										c2: pathArray[i + 1]
-									});
-								} */
-
-				let smallestDistance = 9999;
+				let totalDistance = 0;
 				for (let i = 0; i < pathArrayLen; i++) {
+					let smallestDistance = 9007199254740991;
 					let x1 = pathArray[i][0];
 					let y1 = pathArray[i][1];
 
-					let coord = i;
+					let nextIndex = i + 1;
+					let pointIndex = nextIndex;
 
-					for (let j = i + 1; j < pathArrayLen; j++) {
+					for (let j = nextIndex; j < pathArrayLen; j++) {
 						let x2 = pathArray[j][0];
 						let y2 = pathArray[j][1];
 
-						let d = computeDistanceBetweenPoints(x1, y1, x2, y2);
-						if (d < smallestDistance) {
-							coord = j;
-							smallestDistance = d;
+						let distance = computeDistanceBetweenPoints(x1, y1, x2, y2);
+						if (distance < smallestDistance) {
+							pointIndex = j;
+							smallestDistance = distance;
+							totalDistance = +distance;
 						}
 					}
 
-					// switch places in pathArray second place with coord
-					if (i !== coord - 1) {
-						swapArrayElements(pathArray, coord, i);
-						console.log(`${coord} , ${i} : ${smallestDistance}`);
+					// Switch the next index with the best computed point distance
+					if (nextIndex !== pointIndex) {
+						swapArrayElements(pathArray, nextIndex, pointIndex);
 					}
-
 				}
 
-				//d2.sort((d1, d2) => d1.distance - d2.distance);
-
-				//console.log(d2);
-
-				console.log(pathArray);
-
-				drawCoordinates(pathArray);
-
-				// final step
-				drawPath(pathArray);
-
-				end = performance.now();
-
-				console.log((end - ini) + " ms");
+				optimizedDistance[0] = totalDistance;
 			}
 
-			, registerComputeEvent = function () {
-				let btnCompute = getElementById('btnCompute');
-				btnCompute.addEventListener('click', compute);
+			/**
+			 * Sets event listeners
+			 */
+			, registerEventListeners = function () {
+				getElementById('btnCompute').addEventListener('click', compute);
+
+				getElementById('btnGenerate').addEventListener('click', () => {
+					textarea.value = JSON.stringify(generateRandom2DArray());
+				});
 			}
 
 			/**
 			 * Gets the canvas DOM reference and sets it's size
 			 * @param {string} name the id of the canvas
+			 * @param {number} width the width of the canvas
+			 * @param {number} height the height of the canvas
 			 */
-			, getAndInitializeCanvas = function (name) {
+			, getAndInitializeCanvas = function (name, width, height) {
 				let canvas = getElementById(name);
 
-				canvas.width = 500;
-				canvas.height = 500;
+				canvas.width = width;
+				canvas.height = height;
 
 				return canvas;
 			}
@@ -209,18 +257,55 @@ var WestOfWesteros = {
 				return canvas.getContext('2d');
 			}
 
+			, compute = function () {
+				let pathArray = tryParseJSON(textarea.value);
+
+				if (!pathArray) {
+					return;
+				}
+
+				ini = performance.now();
+
+				clearCanvas(ctx, mapSize, mapSize);
+
+				let optimizedDistance = [];
+				computeOptimizedPath(pathArray, optimizedDistance);
+
+				drawCoordinates(ctx, pathArray);
+				drawPath(ctx, pathArray);
+
+				end = performance.now();
+
+				console.log('optimizedDistance', optimizedDistance[0]);
+				console.log('finalPath', pathArray);
+				console.log((end - ini) + ' ms');
+			}
+
+			/**
+			 * Sets some initial settings
+			 */
+			, initializeSettings = function () {
+				dotSize = 2;
+				mapSize = 500;
+				minVal = 0;
+				maxVal = mapSize;
+				dotColor = 'white';
+
+				canvas = getAndInitializeCanvas('foreground', mapSize, mapSize);
+				ctx = getCanvas2DContext(canvas);
+				createGradient(ctx, mapSize);
+
+				textarea = getElementById('coordinates');
+			}
+
+			/**
+			* Initializes and starts the application
+			*/
 			, initialize = function () {
 
-				canvas = getAndInitializeCanvas('foreground');
-				ctx = getCanvas2DContext(canvas);
+				initializeSettings();
 
-				createGradient();
-
-				registerComputeEvent();
-
-				getElementById('btnGenerate').addEventListener('click', () => {
-					textarea.value = JSON.stringify(generateRandomBiArray());
-				});
+				registerEventListeners();
 			}
 
 		return {
