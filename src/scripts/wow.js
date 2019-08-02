@@ -154,7 +154,7 @@ var WestOfWesteros = {
 			 * @param { number } x2 x coordinate of the second point
 			 * @param { number } y2 y coordinate of the second point
 			 */
-			, computeDistanceBetweenPoints = function (x1, y1, x2, y2) {
+			, computeDistanceBetweenTwoPoints = function (x1, y1, x2, y2) {
 				return Math.sqrt((Math.pow(x2 - x1, 2)) + (Math.pow(y2 - y1, 2)))
 			}
 
@@ -223,7 +223,7 @@ var WestOfWesteros = {
 						let x2 = pathArray[j][0];
 						let y2 = pathArray[j][1];
 
-						let distance = computeDistanceBetweenPoints(x1, y1, x2, y2);
+						let distance = computeDistanceBetweenTwoPoints(x1, y1, x2, y2);
 						if (distance < smallestDistance) {
 							pointIndex = j;
 							smallestDistance = distance;
@@ -274,6 +274,21 @@ var WestOfWesteros = {
 				return canvas.getContext('2d');
 			}
 
+			/**
+			 * Displays stats to the user
+			 * @param {Array} pathArray the optimized path
+			 * @param {number} optimizedDistance the total optimized distance
+			 * @param {number} elapsedTime total time elapsed
+			 */
+			, displayStats = function (pathArray, optimizedDistance, elapsedTime) {
+				console.log('optimizedDistance', optimizedDistance);
+				console.log('finalPath', pathArray);
+				console.log(elapsedTime + ' ms');
+
+				getElementById('distance').innerHTML = optimizedDistance;
+				getElementById('elapsedTime').innerHTML = elapsedTime + ' ms';
+			}
+
 			, compute = function () {
 				let pathArray = tryParseJSON(textarea.value);
 
@@ -281,6 +296,7 @@ var WestOfWesteros = {
 					return;
 				}
 
+				// Note: The browser will round this time.... thanks Spectre!👻
 				ini = performance.now();
 
 				clearCanvas(ctx, mapSize, mapSize);
@@ -292,9 +308,7 @@ var WestOfWesteros = {
 
 				end = performance.now();
 
-				console.log('optimizedDistance', optimizedDistance);
-				console.log('finalPath', pathArray);
-				console.log((end - ini) + ' ms');
+				displayStats(pathArray, optimizedDistance, (end - ini));
 			}
 
 			/**
@@ -334,4 +348,4 @@ WestOfWesteros.init();
 
 // TD: Display stuff on second column
 // foreground canvas dispaly stuff
-// try another algorithm for computation
+// try another algorithm for computation or run this multiple times with shuffled values
