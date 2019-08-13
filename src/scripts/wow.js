@@ -227,7 +227,7 @@ var WestOfWesteros = {
 						if (distance < smallestDistance) {
 							pointIndex = j;
 							smallestDistance = distance;
-							optimizedDistance = +distance;
+							optimizedDistance += distance;
 						}
 					}
 
@@ -285,6 +285,7 @@ var WestOfWesteros = {
 				console.log('finalPath', pathArray);
 				console.log(elapsedTime + ' ms');
 
+				// cache this, or replace it with something else
 				getElementById('distance').innerHTML = optimizedDistance;
 				getElementById('elapsedTime').innerHTML = elapsedTime + ' ms';
 			}
